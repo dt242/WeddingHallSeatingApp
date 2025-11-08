@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Wedding Seating Organizer</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+</head>
+<body>
+<h1>💒 Wedding Seating Organizer</h1>
+<div th:if="${message}"
+     th:text="${message}"
+     th:classappend="${message.startsWith('✅')} ? 'success' : 'error'"
+     class="message">
+</div>
+
+<section>
+    <h2>➕ Add Table</h2>
+    <form action="/addTable" method="post">
+        <input type="text" name="name" placeholder="Table name" required>
+        <button type="submit">Add Table</button>
+    </form>
+</section>
+
+<section>
+    <h2>🚫 Ban Families</h2>
+    <form action="/ban" method="post">
+        <input type="text" name="f1" placeholder="Family 1 name" required>
+        <input type="text" name="f2" placeholder="Family 2 name" required>
+        <button type="submit">Ban</button>
+    </form>
+</section>
+
+<section>
+    <h2 th:text="'🪑 Tables' + ' (' + ${tables.size} + ')'">🪑 Tables</h2>
+    <p th:text="'Total guests: ' + ${totalGuests}"></p>
+    <div th:each="table : ${tables}" class="table">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <h3 th:text="${table.name} + ' (' + ${table.guestCount} + ' guests)'"></h3>
+            <form action="/removeTable" method="post">
+                <input type="hidden" name="name" th:value="${table.name}">
+                <button class="red" type="submit">Remove Table</button>
+            </form>
+        </div>
+
+        <form action="/addFamily" method="post">
+            <input type="hidden" name="tableName" th:value="${table.name}">
+            <input type="text" name="familyName" placeholder="Family name">
+            <button type="submit">Add Family</button>
+        </form>
+
+        <ul class="families">
+            <li th:each="family : ${table.members}">
+                <span th:text="${family.name}"></span>
+                <form action="/removeFamily" method="post" style="display:inline;">
+                    <input type="hidden" name="tableName" th:value="${table.name}">
+                    <input type="hidden" name="familyName" th:value="${family.name}">
+                    <button class="red" type="submit">Remove Family</button>
+                </form>
+                <ul class="guests" th:if="${#lists.size(family.members) > 0}">
+                    <li th:each="guest : ${family.members}">
+                        <span th:text="${guest.name}"></span>
+                        <form action="/removeGuest" method="post" style="display:inline;">
+                            <input type="hidden" name="tableName" th:value="${table.name}">
+                            <input type="hidden" name="familyName" th:value="${family.name}">
+                            <input type="hidden" name="guestName" th:value="${guest.name}">
+                            <button class="red" type="submit">Remove Guest</button>
+                        </form>
+                    </li>
+                </ul>
+                <form th:if="${family.members != null}" action="/addGuest" method="post">
+                    <input type="hidden" name="tableName" th:value="${table.name}">
+                    <input type="hidden" name="familyName" th:value="${family.name}">
+                    <input type="text" name="guestName" placeholder="Guest name">
+                    <button type="submit">Add Guest</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+    <div class="links">
+        <a class="link" href="/guests">See all guests</a>
+        <a class="link" href="/families">See all families</a>
+        <a class="link" href="/tables">See all tables</a>
+    </div>
+</section>
+
+<section>
+    <h2 th:text="'🚫 Bans' + ' (' + ${bans.size} + ')'">🚫 Bans</h2>
+    <div th:each="ban : ${bans}" class="table" style="display:flex; align-items:center; gap:10px;">
+        <h3 th:text="${#strings.arrayJoin(ban.toArray(), ' cannot sit with ')} + '!'"></h3>
+        <form action="/removeBan" method="post" style="display:inline;">
+            <input type="hidden" name="f1" th:value="${#lists.toList(ban).get(0)}">
+            <input type="hidden" name="f2" th:value="${#lists.toList(ban).get(1)}">
+            <button class="red"type="submit">Remove Ban</button>
+        </form>
+    </div>
+</section>
+</body>
+</html>

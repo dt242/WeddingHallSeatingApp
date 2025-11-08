@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Wedding Guests</title>
+  <link rel="stylesheet" th:href="@{/styles.css}">
+</head>
+<body>
+<h1>Wedding Guests</h1>
+<p class="summary">Total guests: <strong th:text="${totalGuests}"></strong></p>
+
+<div class="search-box">
+  <input type="text" id="guestSearch" placeholder="Search for a guest..." onkeyup="filterGuests()">
+</div>
+
+<div class="grid">
+  <div class="card" th:each="guest : ${guests}">
+    <div class="name" th:text="${guest}"></div>
+  </div>
+</div>
+
+<a class="link" href="/">⬅ Back to main page</a>
+
+<script>
+    function filterGuests() {
+        let input = document.getElementById("guestSearch").value.toLowerCase();
+        let cards = document.getElementsByClassName(" card");
+        for (let card of cards) {
+            let name = card.querySelector(".name").textContent.toLowerCase();
+            card.style.display = (name.includes(input)) ? "block" : "none";
+        }
+    }
+</script>
+</body>
+</html>
